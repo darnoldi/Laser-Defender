@@ -5,10 +5,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-
+    [Header("Player")]
+    [SerializeField] int health = 200;
     [SerializeField] float moveSpeed = 10f;
     [SerializeField] float shipPadding = 0.5f;
     [SerializeField] float shipYMax = 0.6f;
+    
+    [Header("Projectile")]
     [SerializeField] GameObject laserPrefab;
     [SerializeField] float laserSpeed = 20f;
     [SerializeField] float firePauseRate = 0.05f;
@@ -63,6 +66,26 @@ public class Player : MonoBehaviour
             laser.GetComponent<Rigidbody2D>().velocity = new Vector2(0f, laserSpeed);
 
             yield return new WaitForSeconds(firePauseRate);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+
+       
+        DamageDealer damageDealer = other.gameObject.GetComponent<DamageDealer>();
+        if (!damageDealer) { return; }
+        ProcessHit(damageDealer);
+       
+    }
+
+    private void ProcessHit(DamageDealer damageDealer)
+    {
+        health -= damageDealer.GetDamage();
+        damageDealer.Hit();
+        if (health <= 0)
+        {
+            Destroy(gameObject);
         }
     }
 
