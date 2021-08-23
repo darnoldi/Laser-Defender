@@ -10,21 +10,30 @@ public class Player : MonoBehaviour
     [SerializeField] float moveSpeed = 10f;
     [SerializeField] float shipPadding = 0.5f;
     [SerializeField] float shipYMax = 0.6f;
-    
+    [SerializeField] AudioClip damageSound;
+    [SerializeField] [Range(0, 1)] float damageSoundVolume = 0.7f;
+    [SerializeField] AudioClip deathSound;
+    [SerializeField] [Range(0, 1)] float deathSoundVolume = 0.7f;
+
     [Header("Projectile")]
     [SerializeField] GameObject laserPrefab;
     [SerializeField] float laserSpeed = 20f;
     [SerializeField] float firePauseRate = 0.05f;
+    [SerializeField] AudioClip laserSound;
+    [SerializeField] [Range(0, 1)] float laserSoundVolume = 0.7f;
     float xMin;
     float xMax;
     float yMin;
     float yMax;
+    Level level;
 
 
 
     // Start is called before the first frame update
     void Start()
     {
+        level = FindObjectOfType<Level>();
+        
         SetupMoveBoundaries();
     }
 
@@ -64,7 +73,7 @@ public class Player : MonoBehaviour
         {
             GameObject laser = Instantiate(laserPrefab, transform.position, Quaternion.identity) as GameObject;
             laser.GetComponent<Rigidbody2D>().velocity = new Vector2(0f, laserSpeed);
-
+            AudioSource.PlayClipAtPoint(laserSound, Camera.main.transform.position, laserSoundVolume);
             yield return new WaitForSeconds(firePauseRate);
         }
     }
@@ -85,8 +94,20 @@ public class Player : MonoBehaviour
         damageDealer.Hit();
         if (health <= 0)
         {
-            Destroy(gameObject);
+            Die();
         }
+        else
+        {
+            AudioSource.PlayClipAtPoint(damageSound, Camera.main.transform.position, damageSoundVolume);
+        }
+    }
+
+    private void Die()
+    {
+       
+        Destroy(gameObject);
+        AudioSource.PlayClipAtPoint(deathSound, Camera.main.transform.position, deathSoundVolume);
+        level.LoadGameOver();
     }
 
     private void SetupMoveBoundaries()
